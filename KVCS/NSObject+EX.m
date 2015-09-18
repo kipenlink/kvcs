@@ -28,6 +28,10 @@
 
 +(id)ObjectsForDict:(NSDictionary *)dic{
     
+    if (!dic) {
+        return nil;
+    }
+    
     unsigned int count;
     objc_property_t *properties = class_copyPropertyList([self class], &count);
     
@@ -51,23 +55,38 @@
             tmpP =array[1];
             // 属性是对象属性--》
             // 判断是否是系统对象属性
-            
+            if ([pName isEqualToString:@"id"]) {
+                
+                NSLog(@"------attri:%@---name:%@---value:%@",tmpP,pName,dic[pName]);
+            }
             if (![self IsOCBaseType:tmpP]) {
                 Class clazz =  NSClassFromString(tmpP);
                 
                id obj =  [clazz ObjectsForDict:(NSDictionary *)dic[pName]];
                 
                 [model setValue:obj forKey:pName];
+            }else{
+            
+                
+                if (dic[pName]) {
+                    
+                    [model setValue:dic[pName] forKey:pName];
+                    
+                }
             }
             
+        }else{
+            
+            //特殊的值 例如id。。
+            if (dic[pName]) {
+              //  NSLog(@"已存入特殊属性的值--如发现模型KVC有误，请在此关闭【%@--%@】",dic[pName],pAttri);
+                [model setValue:dic[pName] forKey:pName];
+                
+            }
         }
         
         
-        if (dic[pName]) {
-            
-            [model setValue:dic[pName] forKey:pName];
-            
-        }
+        
     }
       
     
@@ -90,9 +109,13 @@
     dicM[@"NSNumber"] = @"NSNumber";
     dicM[@"NSInteger"] = @"NSInteger";
     dicM[@"CGFloat"] = @"CGFloat";
+    dicM[@"long"] = @"long";
+    
+
     
     
     
     return dicM[strClz];
 }
+
 @end
